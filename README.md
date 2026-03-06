@@ -612,58 +612,94 @@ flowchart TD
 
     User["👤 User"]
 
-    subgraph Frontend["Frontend — Next.js"]
-        UI["Search UI"]
-        ProductPage["Product Results Page"]
+    subgraph Frontend["Frontend — Next.js 14"]
+        UI["Search UI + URL Crawl"]
+        Chat["Chat Assistant Widget"]
+        ProductPage["Product Detail Page"]
         Charts["Price History Charts"]
+        Jobs["Crawl Jobs Tracker"]
     end
 
     subgraph Backend["Backend — FastAPI"]
-        API["API Endpoints"]
-        CrawlService["Crawl Service"]
-        Analyzer["Quality Analyzer"]
+        ProdAPI["/products — list · detail · compare"]
+        CrawlAPI["/crawl — search · url · jobs"]
+        ChatAPI["/chat — AI Q&A"]
+        BgTask["BackgroundTasks\npending → running → done"]
     end
 
-    subgraph Crawlers["Web Crawlers"]
-        Amazon["Amazon Crawler"]
-        Flipkart["Flipkart Crawler"]
-        Brand["Brand Website Crawler"]
+    subgraph Crawlers["Web Crawlers — Playwright"]
+        Amazon["Amazon.in Crawler\n(direct extraction)"]
+        Flipkart["Flipkart Crawler\n(direct extraction)"]
+        Brand["Brand Site Crawler\nAnveshan · Rosier\nTwo Brothers · Batiora"]
     end
 
-    subgraph AI["AI Models"]
-        Extract["Claude Haiku — Data Extraction"]
-        Score["Claude Sonnet — Quality Scoring"]
+    subgraph AI["Claude AI — Anthropic"]
+        Haiku["Claude Haiku\n① Brand HTML → structured JSON\n② Chat Q&A answers"]
+        Sonnet["Claude Sonnet\nQuality scoring 0–100\ningredients · certs · reviews"]
     end
 
-    subgraph DB["Database — MongoDB"]
-        Products["Products Collection"]
-        Prices["Price History"]
+    subgraph DB["MongoDB Atlas — food_profiler"]
+        Products[("products\n├─ price_history[]\n└─ quality_scores[]")]
+        CrawlJobs[("crawl_jobs\nstatus tracking")]
     end
 
-    User --> UI
-    UI --> API
+    %% User interactions
+    User -->|"search / URL"| UI
+    User -->|"natural language question"| Chat
 
-    API --> CrawlService
-    CrawlService --> Amazon
-    CrawlService --> Flipkart
-    CrawlService --> Brand
+    %% Frontend → Backend
+    UI -->|"POST /crawl/search\nPOST /crawl/url"| CrawlAPI
+    UI -->|"GET /products/"| ProdAPI
+    Chat -->|"POST /chat/"| ChatAPI
+    Jobs -->|"GET /crawl/jobs (poll 5s)"| CrawlAPI
+    ProductPage -->|"GET /products/:id"| ProdAPI
 
-    Amazon --> Extract
-    Flipkart --> Extract
-    Brand --> Extract
+    %% Crawl pipeline
+    CrawlAPI --> BgTask
+    BgTask --> Amazon
+    BgTask --> Flipkart
+    BgTask --> Brand
+    BgTask -->|"status updates"| CrawlJobs
 
-    Extract --> Score
+    %% Brand sites use Haiku for HTML parsing
+    Brand -->|"raw page text"| Haiku
+    Haiku -->|"structured product fields"| Brand
 
-    Score --> Products
-    Amazon --> Prices
-    Flipkart --> Prices
-    Brand --> Prices
+    %% All crawlers → quality scoring via Sonnet
+    Amazon -->|"ScrapedProduct"| Sonnet
+    Flipkart -->|"ScrapedProduct"| Sonnet
+    Brand -->|"ScrapedProduct"| Sonnet
 
-    Products --> API
-    Prices --> API
+    %% Save to DB (price_history + quality_scores embedded in products)
+    Amazon -->|"upsert + price snapshot"| Products
+    Flipkart -->|"upsert + price snapshot"| Products
+    Brand -->|"upsert + price snapshot"| Products
+    Sonnet -->|"quality score + flags"| Products
 
-    API --> ProductPage
+    %% Chat reads full DB
+    ChatAPI -->|"fetch all products"| Products
+    Products -->|"context data"| Haiku
+    Haiku -->|"answer"| ChatAPI
+
+    %% DB → API → Frontend
+    Products --> ProdAPI
+    CrawlJobs --> CrawlAPI
+    ProdAPI --> ProductPage
     ProductPage --> Charts
+    CrawlAPI --> Jobs
+
+    %% Styles
+    classDef frontend fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef api fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef crawler fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef ai fill:#f3e8ff,stroke:#a855f7,color:#3b0764
+    classDef db fill:#ffe4e6,stroke:#f43f5e,color:#4c0519
+
+    class UI,Chat,ProductPage,Charts,Jobs frontend
+    class ProdAPI,CrawlAPI,ChatAPI,BgTask api
+    class Amazon,Flipkart,Brand crawler
+    class Haiku,Sonnet ai
+    class Products,CrawlJobs db
 ```
 
 ---
