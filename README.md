@@ -39,40 +39,105 @@ Frontend shows ranked results
 
 # 🔎 Key Features
 
-| Feature                | Description                                                     |
-| ---------------------- | --------------------------------------------------------------- |
-| 🕸 Web Crawling        | Scrapes product pages from Amazon, Flipkart, and brand websites |
-| 🧾 Ingredient Analysis | Extracts ingredients and certifications                         |
-| 🤖 AI Quality Scoring  | AI evaluates product purity and assigns a score                 |
-| 💰 Price Tracking      | Stores price snapshots over time                                |
-| 📊 Product Ranking     | Displays best quality products at lowest price                  |
-| 📉 Price History       | Shows how product prices change                                 |
+| Feature | Description |
+|------|------|
+| 🕸 Web Crawling | Scrapes product pages from Amazon, Flipkart, and brand websites |
+| 🧾 Ingredient Analysis | Extracts ingredients and certifications |
+| 🤖 AI Quality Scoring | AI evaluates product purity and assigns a score |
+| 💰 Price Tracking | Stores price snapshots over time |
+| 📊 Product Ranking | Displays best quality products at lowest price |
+| 📉 Price History | Shows how product prices change |
 
 ---
 
 # 🏗 System Architecture
 
+### High Level Architecture Diagram
+
+```mermaid
+flowchart TD
+
+    User["👤 User"]
+
+    subgraph Frontend["Frontend — Next.js"]
+        UI["Search UI"]
+        ProductPage["Product Results Page"]
+        Charts["Price History Charts"]
+    end
+
+    subgraph Backend["Backend — FastAPI"]
+        API["API Endpoints"]
+        CrawlService["Crawl Service"]
+        Analyzer["Quality Analyzer"]
+    end
+
+    subgraph Crawlers["Web Crawlers"]
+        Amazon["Amazon Crawler"]
+        Flipkart["Flipkart Crawler"]
+        Brand["Brand Website Crawler"]
+    end
+
+    subgraph AI["AI Models"]
+        Extract["Claude Haiku — Data Extraction"]
+        Score["Claude Sonnet — Quality Scoring"]
+    end
+
+    subgraph DB["Database — MongoDB"]
+        Products["Products Collection"]
+        Prices["Price History"]
+    end
+
+    User --> UI
+    UI --> API
+
+    API --> CrawlService
+    CrawlService --> Amazon
+    CrawlService --> Flipkart
+    CrawlService --> Brand
+
+    Amazon --> Extract
+    Flipkart --> Extract
+    Brand --> Extract
+
+    Extract --> Score
+
+    Score --> Products
+    Amazon --> Prices
+    Flipkart --> Prices
+    Brand --> Prices
+
+    Products --> API
+    Prices --> API
+
+    API --> ProductPage
+    ProductPage --> Charts
+```
+
+---
+
+# 🏗 System Components
+
 ### Frontend
 
-* Next.js 14
-* Tailwind CSS
-* Recharts (price charts)
+- Next.js 14  
+- Tailwind CSS  
+- Recharts (price charts)
 
 ### Backend
 
-* FastAPI
-* Python
-* Playwright (web scraping)
-* BeautifulSoup
+- FastAPI  
+- Python  
+- Playwright (web scraping)  
+- BeautifulSoup  
 
 ### AI Models
 
-* Claude Haiku → Structured data extraction
-* Claude Sonnet → Quality scoring
+- Claude Haiku → Structured data extraction  
+- Claude Sonnet → Quality scoring  
 
 ### Database
 
-* MongoDB
+- MongoDB  
 
 ---
 
@@ -109,23 +174,24 @@ Raw Honey
 
 System will:
 
-1. Crawl multiple product sources
+1. Crawl multiple product sources  
 2. Extract:
 
-   * Ingredients
-   * Certifications
-   * Ratings
-3. Run AI quality scoring
-4. Track product prices
-5. Rank results
+   - Ingredients  
+   - Certifications  
+   - Ratings  
+
+3. Run AI quality scoring  
+4. Track product prices  
+5. Rank results  
 
 Example output:
 
-| Product           | Quality Score | Price |
-| ----------------- | ------------- | ----- |
-| Brand A Raw Honey | 92            | ₹420  |
-| Brand B Raw Honey | 85            | ₹380  |
-| Brand C Raw Honey | 74            | ₹350  |
+| Product | Quality Score | Price |
+|------|------|------|
+| Brand A Raw Honey | 92 | ₹420 |
+| Brand B Raw Honey | 85 | ₹380 |
+| Brand C Raw Honey | 74 | ₹350 |
 
 Users can choose **best purity vs best price**.
 
@@ -133,15 +199,15 @@ Users can choose **best purity vs best price**.
 
 # 🛠 Tech Stack
 
-| Layer        | Technology    |
-| ------------ | ------------- |
-| Frontend     | Next.js       |
-| Backend      | FastAPI       |
-| Crawler      | Playwright    |
+| Layer | Technology |
+|------|------|
+| Frontend | Next.js |
+| Backend | FastAPI |
+| Crawler | Playwright |
 | HTML Parsing | BeautifulSoup |
-| AI           | Claude        |
-| Database     | MongoDB       |
-| Charts       | Recharts      |
+| AI | Claude |
+| Database | MongoDB |
+| Charts | Recharts |
 
 ---
 
@@ -189,12 +255,12 @@ http://localhost:3000
 
 # 💡 Future Improvements
 
-* Product authenticity detection
-* Fake review detection
-* Nutritional scoring
-* Grocery comparison engine
-* AI recommendation engine
-* Mobile app
+- Product authenticity detection  
+- Fake review detection  
+- Nutritional scoring  
+- Grocery comparison engine  
+- AI recommendation engine  
+- Mobile app  
 
 ---
 
@@ -206,10 +272,10 @@ AI Product Builder
 
 Interested in:
 
-* AI systems
-* Agent orchestration
-* Product analytics
-* AI-powered marketplaces
+- AI systems  
+- Agent orchestration  
+- Product analytics  
+- AI-powered marketplaces  
 
 GitHub:
 
@@ -221,8 +287,6 @@ https://github.com/arvind2007yadav
 
 If you find this project interesting:
 
-* ⭐ Star the repository
-* 🍴 Fork it
-* 🤝 Contribute
-
----
+- ⭐ Star the repository  
+- 🍴 Fork it  
+- 🤝 Contribute
