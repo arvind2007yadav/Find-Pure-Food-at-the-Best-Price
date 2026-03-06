@@ -605,5 +605,67 @@ Run `npm install` again from the `frontend/` folder.
 ```
 
 ---
+### High Level Architecture Diagram
+
+```mermaid
+flowchart TD
+
+    User["👤 User"]
+
+    subgraph Frontend["Frontend — Next.js"]
+        UI["Search UI"]
+        ProductPage["Product Results Page"]
+        Charts["Price History Charts"]
+    end
+
+    subgraph Backend["Backend — FastAPI"]
+        API["API Endpoints"]
+        CrawlService["Crawl Service"]
+        Analyzer["Quality Analyzer"]
+    end
+
+    subgraph Crawlers["Web Crawlers"]
+        Amazon["Amazon Crawler"]
+        Flipkart["Flipkart Crawler"]
+        Brand["Brand Website Crawler"]
+    end
+
+    subgraph AI["AI Models"]
+        Extract["Claude Haiku — Data Extraction"]
+        Score["Claude Sonnet — Quality Scoring"]
+    end
+
+    subgraph DB["Database — MongoDB"]
+        Products["Products Collection"]
+        Prices["Price History"]
+    end
+
+    User --> UI
+    UI --> API
+
+    API --> CrawlService
+    CrawlService --> Amazon
+    CrawlService --> Flipkart
+    CrawlService --> Brand
+
+    Amazon --> Extract
+    Flipkart --> Extract
+    Brand --> Extract
+
+    Extract --> Score
+
+    Score --> Products
+    Amazon --> Prices
+    Flipkart --> Prices
+    Brand --> Prices
+
+    Products --> API
+    Prices --> API
+
+    API --> ProductPage
+    ProductPage --> Charts
+```
+
+---
 
 *Built to cut through the noise in the Indian organic food market and find products that are genuinely pure — not just marketed as pure.*
